@@ -1,13 +1,13 @@
 import { GraphQLFloat, GraphQLObjectType } from "graphql";
 
 export const VitalSingsType = new GraphQLObjectType({
-    name: "Vital Signs",
+    name: "VitalSigns",
     description: "Vital Signs representation for graphQL",
-    fields: () => ({
+    fields:{
         bodyTemperature: { type: GraphQLFloat },
         heartRate: { type: GraphQLFloat },
         bloodPressure: { type: GraphQLFloat },
         respirationRate: { type: GraphQLFloat },
         weight: { type: GraphQLFloat }
-    })
+    }
 });
