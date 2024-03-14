@@ -1,7 +1,7 @@
 import express, { json } from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import { createHandler } from "graphql-http";
+import { createHandler } from "graphql-http/lib/use/express";
 import { usersSchema } from "./graphql/GraqphQLRoute.mjs";
 
 const PORT = process.env.PORT || 4000;

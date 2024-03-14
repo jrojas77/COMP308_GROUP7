@@ -11,9 +11,7 @@ const RootQueryType = new GraphQLObjectType({
             type: new GraphQLList(UserType),
             description: 'Get All Users',
             resolve: async () => {
-                console.log("Hellow")
                 let users = await UserModel.find();
-                console.log(users)
                 return users;
             }
         },
@@ -35,6 +33,10 @@ const RootQueryType = new GraphQLObjectType({
                 let patients = PatientModel.find();
                 return patients
             }
+        },
+        test: {
+            type: GraphQLString,
+            resolve: () => "Hello I am Working"
         }
     }
 });
