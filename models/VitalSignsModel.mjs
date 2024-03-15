@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import { Schema, model } from "mongoose";
 
 export const VitalSignsScheme = new Schema({
     bodyTemperature: Number,
@@ -7,3 +7,5 @@ export const VitalSignsScheme = new Schema({
     respirationRate: Number,
     weight: Number
 }, {timestamps: true});
+
+export const VitalSignsModel = model('VitalSigns', VitalSignsScheme);
