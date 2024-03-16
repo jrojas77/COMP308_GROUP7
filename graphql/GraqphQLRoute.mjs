@@ -1,22 +1,36 @@
-import { GraphQLFloat, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from "graphql";
+import { GraphQLError, GraphQLFloat, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from "graphql";
 import { UserType } from "./UserGraphQLType.mjs";
 import { UserModel } from "../models/UserModel.mjs";
 import { PatientModel } from "../models/PatientModel.mjs";
 import { NurseModel } from "../models/NurseModel.mjs";
 import { VitalSingsType } from "./VitalSignsGraphQLType.mjs";
 import { VitalSignsModel } from "../models/VitalSignsModel.mjs";
+import { createToken, requireAuth } from "../utils/Utils.mjs";
+import { TokenPayloadType } from "./TokenPayloadType.mjs";
+
+const USER_MODEL_BY_TYPE = {
+    nurse: NurseModel,
+    patient: PatientModel,
+}
 
 const RootQueryType = new GraphQLObjectType({
     name: 'root',
     description: 'Root Query for Users',
     fields: {
+        me: {
+            type: UserType,
+            description: 'Get profile of currently authenticated user',
+            resolve: requireAuth(async (_, args, { user }) => {
+                return await UserModel.findById(user.userId)
+            })
+        },
         users: {
             type: new GraphQLList(UserType),
             description: 'Get All Users',
-            resolve: async () => {
+            resolve: requireAuth(async () => {
                 let users = await UserModel.find();
                 return users;
-            }
+            })
         },
         user: {
             type: UserType,
@@ -24,18 +38,18 @@ const RootQueryType = new GraphQLObjectType({
             args: {
                 _id: { type: GraphQLString }
             },
-            resolve: async (_, { _id }) => {
+            resolve: requireAuth(async (_, { _id }) => {
                 let user = await UserModel.findById(_id);
                 return user;
-            }
+            })
         },
         patients: {
             type: new GraphQLList(UserType),
             description: 'Get Patients',
-            resolve: async () => {
+            resolve: requireAuth(async () => {
                 let patients = PatientModel.find();
                 return patients
-            }
+            })
         },
         patient: {
             type: UserType,
@@ -43,10 +57,10 @@ const RootQueryType = new GraphQLObjectType({
             args: {
                 _id: { type: GraphQLString }
             },
-            resolve: async (_, { _id }) => {
+            resolve: requireAuth(async (_, { _id }) => {
                 let patient = PatientModel.findById(_id);
                 return patient;
-            }
+            })
         },
         nurse: {
             type: UserType,
@@ -54,10 +68,10 @@ const RootQueryType = new GraphQLObjectType({
             args: {
                 _id: { type: GraphQLString }
             },
-            resolve: async (_, { _id }) => {
+            resolve: requireAuth(async (_, { _id }) => {
                 let nurse = NurseModel.findById(_id);
                 return nurse;
-            }
+            })
         }
     }
 });
@@ -66,9 +80,8 @@ const RootMutatorType = new GraphQLObjectType({
     name: 'mutator',
     description: 'mutator',
     fields: {
-        addUser: {
-            type: UserType,
-            description: 'Create a new User',
+        signup: {
+            type: TokenPayloadType,
             args: {
                 firstName: { type: GraphQLNonNull(GraphQLString) },
                 lastName: { type: GraphQLNonNull(GraphQLString) },
@@ -77,14 +90,37 @@ const RootMutatorType = new GraphQLObjectType({
                 type: { type: GraphQLNonNull(GraphQLString) }
             },
             resolve: async (_, { firstName, lastName, email, password, type }) => {
-                if (type === "nurse") {
-                    let newNurse = new NurseModel({ firstName, lastName, email, password });
-                    return await newNurse.save();
+                try {
+                    const UserModelByType = USER_MODEL_BY_TYPE[type];
+
+                    if (!UserModelByType) {
+                        throw new GraphQLError(`User type: ${type} not supported`);
+                    }
+
+                    const user = await UserModelByType.create({ firstName, lastName, email, password });
+                    const token = createToken(user._id, user.type)
+                    return { token };
+                } catch (ex) {
+                    console.error("signup error", ex);
+                    throw new GraphQLError('An error occurred during signup.');
                 }
-                if (type === "patient") {
-                    let newPatient = new PatientModel({ firstName, lastName, email, password });
-                    return await newPatient.save();
+            }
+        },
+        login: {
+            type: TokenPayloadType,
+            args: {
+                email: { type: GraphQLNonNull(GraphQLString) },
+                password: { type: GraphQLNonNull(GraphQLString) },
+            },
+            resolve: async (_, { email, password }) => {
+                const user = await UserModel.login(email, password);
+
+                if (!user) {
+                    throw new Error('Login failed')
                 }
+
+                const token = createToken(user._id, user.type)
+                return { token };
             }
         },
         addDailyUpdateToPatient: {
@@ -98,13 +134,13 @@ const RootMutatorType = new GraphQLObjectType({
                 respirationRate: { type: GraphQLFloat },
                 weight: { type: GraphQLFloat }
             },
-            resolve: async (_, { _id, bodyTemperature, heartRate, bloodPressure, respirationRate, weight }) => {
+            resolve: requireAuth(async (_, { _id, bodyTemperature, heartRate, bloodPressure, respirationRate, weight }) => {
                 let patient = await PatientModel.findById(_id);
-                let newVitalSigns = patient.dailyInformation.create({bodyTemperature, heartRate, bloodPressure, respirationRate, weight});
+                let newVitalSigns = patient.dailyInformation.create({ bodyTemperature, heartRate, bloodPressure, respirationRate, weight });
                 patient.dailyInformation.push(newVitalSigns);
                 await patient.save();
                 return newVitalSigns;
-            }
+            })
         },
         addVitalsInformation: {
             type: VitalSingsType,
@@ -117,13 +153,13 @@ const RootMutatorType = new GraphQLObjectType({
                 respirationRate: { type: GraphQLFloat },
                 weight: { type: GraphQLFloat }
             },
-            resolve: async (_, { _id, bodyTemperature, heartRate, bloodPressure, respirationRate, weight }) => {
+            resolve: requireAuth(async (_, { _id, bodyTemperature, heartRate, bloodPressure, respirationRate, weight }) => {
                 let patient = await PatientModel.findById(_id);
-                let newVitalSigns = new VitalSignsModel({bodyTemperature, heartRate, bloodPressure, respirationRate, weight});
+                let newVitalSigns = new VitalSignsModel({ bodyTemperature, heartRate, bloodPressure, respirationRate, weight });
                 patient.vitalSignsInformation.push(newVitalSigns);
                 await patient.save();
                 return newVitalSigns;
-            }
+            })
         }
     }
 });
