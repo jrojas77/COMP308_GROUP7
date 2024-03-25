@@ -1,6 +1,5 @@
 import { connect, disconnect } from "mongoose";
 import { VitalSignsModel } from "../models/VitalSignsModel.mjs";
-import should from "should";
 
 import dotenv from "dotenv";
 
@@ -33,6 +32,28 @@ describe(
             function (done) {
                 let newVitalSings = new VitalSignsModel({ bodyTemperature: 36, heartRate: 120, systolicBloodPresure: 30, diastolicBloodPresure: 31, respirationRate: 16, weight: 70 })
                 newVitalSings.validate().then(() => { done("Validation Failed"); }).catch(() => { done(); });
-            });
+            }
+        );
+
+        it('Should not create a Vital Signs entry when Body Temperature out of range',
+            function (done) {
+                let newVitalSings = new VitalSignsModel({ bodyTemperature: 70, heartRate: 120, systolicBloodPresure: 30, diastolicBloodPresure: 25, respirationRate: 16, weight: 70 });
+                newVitalSings.validate().then(() => { done("Validation Failed"); }).catch(() => { done(); });
+            }
+        );
+
+        it('Should not create a Vital Signs entry with heart rate out of range',
+            function(done) {
+                let newVitalSings = new VitalSignsModel({ bodyTemperature: 36, heartRate: 300, systolicBloodPresure: 30, diastolicBloodPresure: 25, respirationRate: 16, weight: 70 });
+                newVitalSings.validate().then(() => { done("Validation Failed"); }).catch(() => { done(); });
+            }
+        );
+
+        it('Should not create a Vital Signs entry with weight below 5',
+            function(done) {
+                let newVitalSings = new VitalSignsModel({ bodyTemperature: 36, heartRate: 120, systolicBloodPresure: 30, diastolicBloodPresure: 25, respirationRate: 16, weight: 0 });
+                newVitalSings.validate().then(() => { done("Validation Failed"); }).catch(() => { done(); });
+            }
+        );
     }
 );
