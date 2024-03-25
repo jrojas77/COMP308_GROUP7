@@ -4,7 +4,7 @@
   "description": "Group Project COMP308 g7",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha",
     "start": "node server.mjs",
     "dev": "node -r dotenv/config server.mjs"
   },
@@ -20,5 +20,10 @@
     "graphql-http": "^1.22.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.2.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "mocha": "^10.3.0",
+    "should": "^13.2.3"
   }
 }

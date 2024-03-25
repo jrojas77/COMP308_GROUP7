@@ -1,5 +1,12 @@
 import { Schema, model } from "mongoose";
 
+function DiastolicValidation(value){
+    if (this.systolicBloodPresure > 0) {
+        return this.systolicBloodPresure > value;
+    }
+    return true;
+}
+
 export const VitalSignsScheme = new Schema({
     bodyTemperature: {
         type: Number,
@@ -12,9 +19,17 @@ export const VitalSignsScheme = new Schema({
         max: 250
     },
     systolicBloodPresure: Number,
-    diastolicBloodPresure: Number,
+    diastolicBloodPresure: {
+        type: Number,
+        validate: {
+            validator: DiastolicValidation
+        }
+    },
     respirationRate: Number,
-    weight: Number
-}, {timestamps: true});
+    weight: {
+        type: Number,
+        min: 10
+    }
+}, { timestamps: true });
 
 export const VitalSignsModel = model('VitalSigns', VitalSignsScheme);
