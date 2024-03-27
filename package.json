@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha",
     "start": "node server.mjs",
-    "dev": "node -r dotenv/config server.mjs"
+    "dev": "node -r dotenv/config server.mjs",
+    "populate": "node setup_backend.mjs"
   },
   "author": "",
   "license": "ISC",
