@@ -7,9 +7,11 @@ export const VitalSingsType = new GraphQLObjectType({
         bodyTemperature: { type: GraphQLFloat },
         heartRate: { type: GraphQLFloat },
         bloodPressure: { type: GraphQLFloat },
+        systolicBloodPresure: { type: GraphQLString },
+        diastolicBloodPresure: { type: GraphQLString },
         respirationRate: { type: GraphQLFloat },
         weight: { type: GraphQLFloat },
-        createdDate: { type: GraphQLString },
-        updateDate: { type: GraphQLString }
+        createdAt: { type: GraphQLString },
+        updatedAt: { type: GraphQLString }
     }
 });
