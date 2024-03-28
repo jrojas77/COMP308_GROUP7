@@ -31,6 +31,7 @@ using this command will run the require command for the dotenv config function, 
 DB = mongoconnectionstring
 JWT_SECRET = a_secret
 PORT = server port || 3000
+NODE_OPTIONS=--experimental-vm-modules jest
 ```
 
 ## Authentication
