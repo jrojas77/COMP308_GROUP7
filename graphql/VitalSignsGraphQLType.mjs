@@ -1,4 +1,9 @@
-import { GraphQLFloat, GraphQLObjectType, GraphQLString } from "graphql";
+import {
+  GraphQLFloat,
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLNonNull,
+} from "graphql";
 
 export const VitalSingsType = new GraphQLObjectType({
   name: "VitalSigns",
