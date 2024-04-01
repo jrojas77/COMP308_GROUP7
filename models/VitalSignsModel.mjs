@@ -1,8 +1,8 @@
 import { Schema, model } from "mongoose";
 
 function DiastolicValidation(value) {
-  if (this.systolicBloodPresure > 0) {
-    return this.systolicBloodPresure > value;
+  if (this.systolicBloodPressure > 0) {
+    return this.systolicBloodPressure > value;
   }
   return true;
 }

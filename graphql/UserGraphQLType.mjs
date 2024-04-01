@@ -4,7 +4,7 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from "graphql";
-import { VitalSingsType } from "./VitalSignsGraphQLType.mjs";
+import { VitalSignsType } from "./VitalSignsGraphQLType.mjs";
 
 export const UserType = new GraphQLObjectType({
   name: "User",
@@ -16,7 +16,7 @@ export const UserType = new GraphQLObjectType({
     lastName: { type: GraphQLNonNull(GraphQLString) },
     dateOfBirth: { type: GraphQLNonNull(GraphQLString) },
     type: { type: GraphQLString },
-    vitalSigns: { type: new GraphQLList(VitalSingsType) },
-    dailyUpdates: { type: new GraphQLList(VitalSingsType) },
+    vitalSigns: { type: new GraphQLList(VitalSignsType) },
+    dailyUpdates: { type: new GraphQLList(VitalSignsType) },
   },
 });
