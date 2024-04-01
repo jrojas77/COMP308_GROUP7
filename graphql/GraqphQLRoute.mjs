@@ -130,13 +130,13 @@ const RootMutatorType = new GraphQLObjectType({
                 _id: { type: GraphQLNonNull(GraphQLString) },
                 bodyTemperature: { type: GraphQLFloat },
                 heartRate: { type: GraphQLFloat },
-                bloodPressure: { type: GraphQLFloat },
+                systolicBloodPresure: { type: GraphQLFloat },
                 respirationRate: { type: GraphQLFloat },
                 weight: { type: GraphQLFloat }
             },
-            resolve: requireAuth(async (_, { _id, bodyTemperature, heartRate, bloodPressure, respirationRate, weight }) => {
+            resolve: requireAuth(async (_, { _id, bodyTemperature, heartRate, systolicBloodPresure, diastolicBloodPresure, respirationRate, weight }) => {
                 let patient = await PatientModel.findById(_id);
-                let newVitalSigns = patient.dailyInformation.create({ bodyTemperature, heartRate, bloodPressure, respirationRate, weight });
+                let newVitalSigns = patient.dailyInformation.create({ bodyTemperature, heartRate, systolicBloodPresure, diastolicBloodPresure, respirationRate, weight });
                 patient.dailyInformation.push(newVitalSigns);
                 await patient.save();
                 return newVitalSigns;
@@ -149,16 +149,28 @@ const RootMutatorType = new GraphQLObjectType({
                 _id: { type: GraphQLNonNull(GraphQLString) },
                 bodyTemperature: { type: GraphQLFloat },
                 heartRate: { type: GraphQLFloat },
-                bloodPressure: { type: GraphQLFloat },
+                systolicBloodPresure: { type: GraphQLFloat },
+                diastolicBloodPresure: { type: GraphQLFloat },                
                 respirationRate: { type: GraphQLFloat },
                 weight: { type: GraphQLFloat }
             },
-            resolve: requireAuth(async (_, { _id, bodyTemperature, heartRate, bloodPressure, respirationRate, weight }) => {
-                let patient = await PatientModel.findById(_id);
-                let newVitalSigns = new VitalSignsModel({ bodyTemperature, heartRate, bloodPressure, respirationRate, weight });
-                patient.vitalSignsInformation.push(newVitalSigns);
-                await patient.save();
-                return newVitalSigns;
+            resolve: requireAuth(async (_, { _id, bodyTemperature, heartRate, systolicBloodPresure, diastolicBloodPresure, respirationRate, weight }) => {
+                try {
+                    console.log("_ID:",_id);
+                    let patient = await PatientModel.findById(_id);
+                    if (!patient) {
+                        throw new GraphQLError(`Patient with ID ${_id} not found`);
+                    }
+
+                    let newVitalSigns = new VitalSignsModel({ bodyTemperature, heartRate, systolicBloodPresure, diastolicBloodPresure, respirationRate, weight });
+                    patient.vitalSignsInformation.push(newVitalSigns);
+                    await patient.save();
+                    return newVitalSigns;
+                } catch (error) {
+                    console.error("addVitalsInformation error", error);
+                    throw new GraphQLError('An error occurred while adding vitals information.');
+                }
+
             })
         }
     }

@@ -86,8 +86,29 @@ let arrayOfPatients = [
 ];
 
 (async function () {
-    const connection = await mongoose.connect(process.env.DB);
-    await NurseModel.create(arrayOfNurses);
-    await PatientModel.create(arrayOfPatients);
-    mongoose.disconnect();
+    try {
+        // Connect to the MongoDB database
+        const connection = await mongoose.connect(process.env.DB);
+
+        // Create nurses and patients
+        await NurseModel.create(arrayOfNurses);
+        await PatientModel.create(arrayOfPatients);
+
+                // Log confirmation message
+                console.log("Nurses and patients successfully recorded in the database.");
+
+                // Retrieve an example nurse and patient
+                const exampleNurse = await NurseModel.findOne();
+                const examplePatient = await PatientModel.findOne();
+        
+                // Log the example nurse and patient
+                console.log("Example Nurse:", exampleNurse);
+                console.log("Example Patient:", examplePatient);
+        
+        // Disconnect from the database
+        mongoose.disconnect();
+
+    } catch (error) {
+        console.error("An error occurred:", error);
+    }
 })();

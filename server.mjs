@@ -4,6 +4,10 @@ import mongoose from "mongoose";
 import { createHandler } from "graphql-http/lib/use/express";
 import { usersSchema } from "./graphql/GraqphQLRoute.mjs";
 import { expressjwt } from "express-jwt";
+import dotenv from 'dotenv';
+dotenv.config();
+
+
 
 const PORT = process.env.PORT || 4000;
 const DB = process.env.DB;
@@ -18,7 +22,7 @@ const auth = expressjwt({
     algorithms: ["HS256"],
     credentialsRequired: false,
     requestProperty: "user",
-})
+});
 
 const app = express();
 app.use(cors());
