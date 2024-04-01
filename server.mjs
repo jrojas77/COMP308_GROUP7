@@ -7,6 +7,7 @@ import { createHandler } from "graphql-http/lib/use/express";
 import { usersSchema } from "./graphql/GraqphQLRoute.mjs";
 import { expressjwt } from "express-jwt";
 
+
 const PORT = process.env.PORT || 4000;
 const DB = process.env.DB;
 const JWT_SECRET = process.env.JWT_SECRET;

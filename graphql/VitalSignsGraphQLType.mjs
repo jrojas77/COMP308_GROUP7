@@ -1,23 +1,18 @@
-import {
-  GraphQLFloat,
-  GraphQLObjectType,
-  GraphQLString,
-  GraphQLNonNull,
-} from "graphql";
+import { GraphQLFloat, GraphQLObjectType, GraphQLString, GraphQLID } from "graphql";
 
 export const VitalSingsType = new GraphQLObjectType({
-  name: "VitalSigns",
-  description: "Vital Signs representation for graphQL",
-  fields: {
-    _id: { type: new GraphQLNonNull(GraphQLString) },
-    bodyTemperature: { type: GraphQLFloat },
-    heartRate: { type: GraphQLFloat },
-    bloodPressure: { type: GraphQLFloat },
-    systolicBloodPressure: { type: GraphQLString },
-    diastolicBloodPressure: { type: GraphQLString },
-    respirationRate: { type: GraphQLFloat },
-    weight: { type: GraphQLFloat },
-    createdAt: { type: GraphQLString },
-    updatedAt: { type: GraphQLString },
-  },
+    name: "VitalSigns",
+    description: "Vital Signs representation for graphQL",
+    fields: {
+        _id: { type: GraphQLID},
+        bodyTemperature: { type: GraphQLFloat },
+        heartRate: { type: GraphQLFloat },
+        bloodPressure: { type: GraphQLFloat },
+        systolicBloodPresure: { type: GraphQLFloat },
+        diastolicBloodPresure: { type: GraphQLFloat },
+        respirationRate: { type: GraphQLFloat },
+        weight: { type: GraphQLFloat },
+        createdAt: { type: GraphQLString },
+        updatedAt: { type: GraphQLString }
+    }
 });
