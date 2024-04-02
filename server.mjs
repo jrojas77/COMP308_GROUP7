@@ -4,9 +4,8 @@ dotenv.config();
 import cors from "cors";
 import mongoose from "mongoose";
 import { createHandler } from "graphql-http/lib/use/express";
-import { usersSchema } from "./graphql/GraqphQLRoute.mjs";
+import { usersSchema } from "./graphql/GraphQLRoute.mjs";
 import { expressjwt } from "express-jwt";
-
 
 const PORT = process.env.PORT || 4000;
 const DB = process.env.DB;
