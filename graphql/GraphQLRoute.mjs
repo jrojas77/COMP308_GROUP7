@@ -136,7 +136,6 @@ const RootMutatorType = new GraphQLObjectType({
         if (!user) {
           throw new Error("Login failed");
         }
-
         const token = createToken(user._id, user.type);
         return { token };
       },
@@ -146,7 +145,6 @@ const RootMutatorType = new GraphQLObjectType({
       description:
         "Add daily Updated Vital sign for the patient by the patient",
       args: {
-        _id: { type: GraphQLNonNull(GraphQLString) },
         bodyTemperature: { type: GraphQLFloat },
         heartRate: { type: GraphQLFloat },
         systolicBloodPressure: { type: GraphQLFloat },
@@ -158,7 +156,6 @@ const RootMutatorType = new GraphQLObjectType({
         async (
           _,
           {
-            _id,
             bodyTemperature,
             heartRate,
             systolicBloodPressure,
@@ -187,7 +184,6 @@ const RootMutatorType = new GraphQLObjectType({
       description:
         "Add daily Updated Vital sign for the patient by the patient",
       args: {
-        _id: { type: GraphQLNonNull(GraphQLString) },
         bodyTemperature: { type: GraphQLFloat },
         heartRate: { type: GraphQLFloat },
         systolicBloodPressure: { type: GraphQLFloat },
@@ -199,7 +195,6 @@ const RootMutatorType = new GraphQLObjectType({
         async (
           _,
           {
-            _id,
             bodyTemperature,
             heartRate,
             systolicBloodPressure,
@@ -208,18 +203,30 @@ const RootMutatorType = new GraphQLObjectType({
             weight,
           }
         ) => {
-          let patient = await PatientModel.findById(_id);
-          let newVitalSigns = new VitalSignsModel({
-            bodyTemperature,
-            heartRate,
-            systolicBloodPressure,
-            diastolicBloodPressure,
-            respirationRate,
-            weight,
-          });
-          patient.vitalSignsInformation.push(newVitalSigns);
-          await patient.save();
-          return newVitalSigns;
+          try {
+            console.log("_ID:", _id);
+            let patient = await PatientModel.findById(_id);
+            if (!patient) {
+              throw new GraphQLError(`Patient with ID ${_id} not found`);
+            }
+
+            let newVitalSigns = new VitalSignsModel({
+              bodyTemperature,
+              heartRate,
+              systolicBloodPressure,
+              diastolicBloodPressure,
+              respirationRate,
+              weight,
+            });
+            patient.vitalSignsInformation.push(newVitalSigns);
+            await patient.save();
+            return newVitalSigns;
+          } catch (error) {
+            console.error("addVitalsInformation error", error);
+            throw new GraphQLError(
+              "An error occurred while adding vitals information."
+            );
+          }
         }
       ),
     },
