@@ -103,6 +103,11 @@ const RootMutatorType = new GraphQLObjectType({
         { firstName, lastName, email, password, type, dateOfBirth }
       ) => {
         try {
+          const existingUser = await UserModel.findOne({ email: email });
+          if (existingUser) {
+            throw new GraphQLError("Email already registered.");
+          }
+
           const UserModelByType = USER_MODEL_BY_TYPE[type];
 
           if (!UserModelByType) {
@@ -116,11 +121,14 @@ const RootMutatorType = new GraphQLObjectType({
             password,
             dateOfBirth,
           });
-          const token = createToken(user._id, user.type);
-          return { token };
+          return user;
         } catch (ex) {
           console.error("signup error", ex);
-          throw new GraphQLError("An error occurred during signup.");
+          if (ex.message === "Email already registered.") {
+            throw new GraphQLError(ex.message);
+          } else {
+            throw new GraphQLError("An error occurred during signup.");
+          }
         }
       },
     },
