@@ -192,6 +192,7 @@ const RootMutatorType = new GraphQLObjectType({
       description:
         "Add daily Updated Vital sign for the patient by the patient",
       args: {
+        _id: { type: GraphQLNonNull(GraphQLString) },
         bodyTemperature: { type: GraphQLFloat },
         heartRate: { type: GraphQLFloat },
         systolicBloodPressure: { type: GraphQLFloat },
@@ -203,6 +204,7 @@ const RootMutatorType = new GraphQLObjectType({
         async (
           _,
           {
+            _id,
             bodyTemperature,
             heartRate,
             systolicBloodPressure,

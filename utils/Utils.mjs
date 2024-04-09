@@ -2,11 +2,17 @@ import jwt from "jsonwebtoken";
 
 const createToken = (userId, userType) => {
   //Issued At
-  const iat = Math.floor(Date.now() / 1000);
-  return jwt.sign({ userId, userType, iat }, process.env.JWT_SECRET, {
-    expiresIn: "1y",
-    algorithm: "HS256",
-  });
+  try {
+    const iat = Math.floor(Date.now() / 1000);
+    console.log("Token Created for User: ", userId);
+    return jwt.sign({ userId, userType, iat }, process.env.JWT_SECRET, {
+      expiresIn: "1y",
+      algorithm: "HS256",
+    });
+  } catch (error) {
+    console.error("Error creating token: ", error);
+    throw new Error("Error creating token");
+  }
 };
 
 const requireAuth =

@@ -4,6 +4,6 @@ export const TokenPayloadType = new GraphQLObjectType({
   name: "Token",
   description: "Authentication Token",
   fields: {
-    token: { type: GraphQLString },
+    token: { type: GraphQLNonNull(GraphQLString) },
   },
 });
