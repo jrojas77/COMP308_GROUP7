@@ -6,7 +6,7 @@ export const options = { discriminatorKey: 'type' }
 const UserSchema = new Schema({
     email: {
         type: String,
-        required: [true, 'Pls enter an email'],
+        required: [true, 'Please enter an email'],
         unique: true,
         lowercase: true,
     },
