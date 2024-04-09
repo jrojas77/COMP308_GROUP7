@@ -109,6 +109,11 @@ const RootMutatorType = new GraphQLObjectType({
             throw new GraphQLError(`User type: ${type} not supported`);
           }
 
+          let similarEmailUser = await UserModel.find({ email });
+          if (similarEmailUser.length > 0) {
+            throw new GraphQLError(`User with email ${email} already exists`);
+          }
+
           const user = await UserModelByType.create({
             firstName,
             lastName,
