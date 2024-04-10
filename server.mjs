@@ -38,6 +38,7 @@ app.use(
     },
     formatError: (error) => {
       console.error(error);
+      return error;
     },
   })
 );
