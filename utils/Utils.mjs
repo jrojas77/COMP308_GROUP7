@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
 
-const createToken = (userId, userType) => {
+const createToken = (userId, { type: userType, firstName, lastName }) => {
   //Issued At
   try {
     const iat = Math.floor(Date.now() / 1000);
     console.log("Token Created for User: ", userId);
-    return jwt.sign({ userId, userType, iat }, process.env.JWT_SECRET, {
+    return jwt.sign({ userId, iat, userType, firstName, lastName }, process.env.JWT_SECRET, {
       expiresIn: "1y",
       algorithm: "HS256",
     });
