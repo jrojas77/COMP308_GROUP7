@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
 
-const createToken = (userId, userType) => {
+const createToken = (userId, { type: userType, firstName, lastName }) => {
     //Issued At
     const iat = Math.floor(Date.now() / 1000);
-    return jwt.sign({ userId, userType, iat }, process.env.JWT_SECRET, { expiresIn: '1y', algorithm: 'HS256' });
+    return jwt.sign({ userId, userType, firstName, lastName, iat }, process.env.JWT_SECRET, { expiresIn: '1y', algorithm: 'HS256' });
 }
 
 const requireAuth = (resolver) => async (_, args, context, ...rest) => {

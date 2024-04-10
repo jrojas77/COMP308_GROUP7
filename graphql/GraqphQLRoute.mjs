@@ -121,7 +121,7 @@ const RootMutatorType = new GraphQLObjectType({
             password,
             dateOfBirth,
           });
-          const token = createToken(user._id, user.type);
+          const token = createToken(user._id, user);
           return { token };
         } catch (ex) {
           console.error("signup error", ex);
@@ -141,7 +141,7 @@ const RootMutatorType = new GraphQLObjectType({
         if (!user) {
           throw new Error("Login failed");
         }
-        const token = createToken(user._id, user.type);
+        const token = createToken(user._id, user);
         return { token };
       },
     },
