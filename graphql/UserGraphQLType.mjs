@@ -16,7 +16,7 @@ export const UserType = new GraphQLObjectType({
     lastName: { type: GraphQLNonNull(GraphQLString) },
     dateOfBirth: { type: GraphQLNonNull(GraphQLString) },
     type: { type: GraphQLString },
-    vitalSigns: { type: new GraphQLList(VitalSignsType) },
-    dailyUpdates: { type: new GraphQLList(VitalSignsType) },
+    vitalSignsInformation: { type: new GraphQLList(VitalSignsType) },
+    dailyUpdates: { type: new GraphQLList(VitalSignsType) }
   },
 });
