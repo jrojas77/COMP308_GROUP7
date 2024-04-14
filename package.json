@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "start": "nodemon server.mjs",
+    "start": "node server.mjs",
     "dev": "node -r dotenv/config server.mjs",
     "populate": "node setup_backend.mjs"
   },
