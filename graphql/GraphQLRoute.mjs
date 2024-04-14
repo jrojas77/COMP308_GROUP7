@@ -9,6 +9,7 @@ import {
   GraphQLBoolean,
 } from "graphql";
 import { UserType } from "./UserGraphQLType.mjs";
+import { PatientType } from "./PatientGraphQLType.mjs";
 import { UserModel } from "../models/UserModel.mjs";
 import { PatientModel } from "../models/PatientModel.mjs";
 import { NurseModel } from "../models/NurseModel.mjs";
@@ -55,7 +56,7 @@ const RootQueryType = new GraphQLObjectType({
       }),
     },
     patients: {
-      type: new GraphQLList(UserType),
+      type: new GraphQLList(PatientType),
       description: "Get Patients",
       resolve: requireAuth(async () => {
         let patients = PatientModel.find();
@@ -63,7 +64,7 @@ const RootQueryType = new GraphQLObjectType({
       }),
     },
     patient: {
-      type: UserType,
+      type: PatientType,
       description: "Get Patient By Id",
       args: {
         _id: { type: GraphQLString },
