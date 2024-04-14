@@ -7,7 +7,8 @@
     "test": "mocha",
     "start": "node server.mjs",
     "dev": "node -r dotenv/config server.mjs",
-    "populate": "node setup_backend.mjs"
+    "populate": "node setup_backend.mjs",
+    "build":"npm run build"
   },
   "author": "",
   "license": "ISC",
