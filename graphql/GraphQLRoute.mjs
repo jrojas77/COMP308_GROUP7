@@ -279,8 +279,6 @@ const RootMutatorType = new GraphQLObjectType({
 
           const newSymptomEntry = new SymptomsModel({
             ...symptoms,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
           });
 
           // Assuming the `symptoms` field in the Patient model is an array
