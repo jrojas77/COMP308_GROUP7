@@ -6,15 +6,19 @@ import {
   GraphQLObjectType,
   GraphQLSchema,
   GraphQLString,
+  GraphQLBoolean,
 } from "graphql";
 import { UserType } from "./UserGraphQLType.mjs";
+import { PatientType } from "./PatientGraphQLType.mjs";
 import { UserModel } from "../models/UserModel.mjs";
 import { PatientModel } from "../models/PatientModel.mjs";
 import { NurseModel } from "../models/NurseModel.mjs";
+import { SymptomsModel } from "../models/SymptomsModel.mjs";
 import { VitalSignsType } from "./VitalSignsGraphQLType.mjs";
 import { VitalSignsModel } from "../models/VitalSignsModel.mjs";
 import { createToken, requireAuth } from "../utils/Utils.mjs";
 import { TokenPayloadType } from "./TokenPayloadType.mjs";
+import { SymptomsType } from "./SymptomsGraphQLType.mjs";
 
 const USER_MODEL_BY_TYPE = {
   nurse: NurseModel,
@@ -52,7 +56,7 @@ const RootQueryType = new GraphQLObjectType({
       }),
     },
     patients: {
-      type: new GraphQLList(UserType),
+      type: new GraphQLList(PatientType),
       description: "Get Patients",
       resolve: requireAuth(async () => {
         let patients = PatientModel.find();
@@ -60,7 +64,7 @@ const RootQueryType = new GraphQLObjectType({
       }),
     },
     patient: {
-      type: UserType,
+      type: PatientType,
       description: "Get Patient By Id",
       args: {
         _id: { type: GraphQLString },
@@ -103,6 +107,11 @@ const RootMutatorType = new GraphQLObjectType({
         { firstName, lastName, email, password, type, dateOfBirth }
       ) => {
         try {
+          const existingUser = await UserModel.findOne({ email: email });
+          if (existingUser) {
+            throw new GraphQLError("Email already registered.");
+          }
+
           const UserModelByType = USER_MODEL_BY_TYPE[type];
 
           if (!UserModelByType) {
@@ -116,11 +125,14 @@ const RootMutatorType = new GraphQLObjectType({
             password,
             dateOfBirth,
           });
-          const token = createToken(user._id, user.type);
-          return { token };
+          return user;
         } catch (ex) {
           console.error("signup error", ex);
-          throw new GraphQLError("An error occurred during signup.");
+          if (ex.message === "Email already registered.") {
+            throw new GraphQLError(ex.message);
+          } else {
+            throw new GraphQLError("An error occurred during signup.");
+          }
         }
       },
     },
@@ -131,14 +143,21 @@ const RootMutatorType = new GraphQLObjectType({
         password: { type: GraphQLNonNull(GraphQLString) },
       },
       resolve: async (_, { email, password }) => {
-        const user = await UserModel.login(email, password);
+        try {
+          const user = await UserModel.login(email, password);
 
-        if (!user) {
-          throw new Error("Login failed");
+          if (!user) {
+            throw new GraphQLError("Login failed");
+          }
+          const token = createToken(user._id, user);
+          return { token };
+        } catch (ex) {
+          if (ex.message === "Incorrect password") {
+            throw new GraphQLError(ex.message);
+          } else {
+            throw new GraphQLError("An error occurred during login.");
+          }
         }
-
-        const token = createToken(user._id, user.type);
-        return { token };
       },
     },
     addDailyUpdateToPatient: {
@@ -146,7 +165,6 @@ const RootMutatorType = new GraphQLObjectType({
       description:
         "Add daily Updated Vital sign for the patient by the patient",
       args: {
-        _id: { type: GraphQLNonNull(GraphQLString) },
         bodyTemperature: { type: GraphQLFloat },
         heartRate: { type: GraphQLFloat },
         systolicBloodPressure: { type: GraphQLFloat },
@@ -158,7 +176,6 @@ const RootMutatorType = new GraphQLObjectType({
         async (
           _,
           {
-            _id,
             bodyTemperature,
             heartRate,
             systolicBloodPressure,
@@ -208,20 +225,75 @@ const RootMutatorType = new GraphQLObjectType({
             weight,
           }
         ) => {
-          let patient = await PatientModel.findById(_id);
-          let newVitalSigns = new VitalSignsModel({
-            bodyTemperature,
-            heartRate,
-            systolicBloodPressure,
-            diastolicBloodPressure,
-            respirationRate,
-            weight,
-          });
-          patient.vitalSignsInformation.push(newVitalSigns);
-          await patient.save();
-          return newVitalSigns;
+          try {
+            console.log("_ID:", _id);
+            let patient = await PatientModel.findById(_id);
+            if (!patient) {
+              throw new GraphQLError(`Patient with ID ${_id} not found`);
+            }
+
+            let newVitalSigns = new VitalSignsModel({
+              bodyTemperature,
+              heartRate,
+              systolicBloodPressure,
+              diastolicBloodPressure,
+              respirationRate,
+              weight,
+            });
+            patient.vitalSignsInformation.push(newVitalSigns);
+            await patient.save();
+            return newVitalSigns;
+          } catch (error) {
+            console.error("addVitalsInformation error", error);
+            throw new GraphQLError(
+              "An error occurred while adding vitals information."
+            );
+          }
         }
       ),
+    },
+    addSymptomsData: {
+      type: SymptomsType,
+      description:
+        "Add daily updated symptom information for the patient by the patient",
+      args: {
+        _id: { type: new GraphQLNonNull(GraphQLString) },
+        fever: { type: GraphQLBoolean },
+        tiredness: { type: GraphQLBoolean },
+        dryCough: { type: GraphQLBoolean },
+        difficultyInBreathing: { type: GraphQLBoolean },
+        soreThroat: { type: GraphQLBoolean },
+        pains: { type: GraphQLBoolean },
+        nasalCongestion: { type: GraphQLBoolean },
+        runnyNose: { type: GraphQLBoolean },
+        diarrhea: { type: GraphQLBoolean },
+        contact: { type: GraphQLString },
+        severity: { type: GraphQLBoolean },
+      },
+      resolve: requireAuth(async (_, args, context) => {
+        try {
+          const { _id, ...symptoms } = args;
+          let patient = await PatientModel.findById(_id);
+          if (!patient) {
+            throw new GraphQLError(`Patient with ID ${_id} not found`);
+          }
+
+          const newSymptomEntry = new SymptomsModel({
+            ...symptoms,
+          });
+
+          // Assuming the `symptoms` field in the Patient model is an array
+          patient.symptoms.push(newSymptomEntry);
+          await patient.save();
+
+          return newSymptomEntry;
+        } catch (error) {
+          console.error("addSymptomsData error:", error);
+          throw new GraphQLError(
+            "An error occurred while adding symptoms information."
+          );
+        }
+      }),
     },
   },
 });
